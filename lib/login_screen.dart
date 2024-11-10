@@ -12,20 +12,21 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   SharedPreferences? sharedPreferences;
 
-  TextEditingController userController= TextEditingController();
-  TextEditingController passwordController= TextEditingController();
+  TextEditingController userController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
 
   GlobalKey<FormState> _formKey = GlobalKey();
 
-  userCheck()async{
+  userCheck() async {
     sharedPreferences = await SharedPreferences.getInstance();
-    var userData= await sharedPreferences!.getString('user');
-    var passData= await sharedPreferences!.getString('pass');
-    if(userData!=null && passData!=null){
-      Navigator.push(context, MaterialPageRoute(builder: (context)=>HomePage()));
-    }
-    else{
-      Navigator.push(context, MaterialPageRoute(builder: (context)=>LoginPage()));
+    var userData = await sharedPreferences!.getString('user');
+    var passData = await sharedPreferences!.getString('pass');
+    if (userData != null && passData != null) {
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => HomePage()));
+    } else {
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => LoginPage()));
     }
   }
 
@@ -34,6 +35,7 @@ class _LoginPageState extends State<LoginPage> {
     userCheck();
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -48,8 +50,8 @@ class _LoginPageState extends State<LoginPage> {
           child: Column(
             children: [
               TextFormField(
-                validator: (value){
-                  if(value!.isEmpty){
+                validator: (value) {
+                  if (value!.isEmpty) {
                     return 'username cannot be empty';
                   }
                 },
@@ -57,8 +59,8 @@ class _LoginPageState extends State<LoginPage> {
                 //autofocus: true,
               ),
               TextFormField(
-                validator: (val){
-                  if(val!.isEmpty){
+                validator: (val) {
+                  if (val!.isEmpty) {
                     return 'password cant be empty';
                   }
                 },
@@ -66,22 +68,25 @@ class _LoginPageState extends State<LoginPage> {
                 //autofocus: true,
               ),
               MaterialButton(
-                  onPressed: ()async{
-                    sharedPreferences=await SharedPreferences.getInstance();
-                    sharedPreferences!.setString('user', userController.text.toString());
-                    sharedPreferences!.setString('pass', passwordController.text.toString());
-                    print('User: ${sharedPreferences!.getString('user')}');
-                    print('Password: ${sharedPreferences!.getString('pass')}');
-                    if(_formKey.currentState!.validate()){
-                      Navigator.push(context, MaterialPageRoute(builder: (context)=>HomePage()));
-                      print('successful');
-                    }
-                  },
+                onPressed: () async {
+                  sharedPreferences = await SharedPreferences.getInstance();
+                  sharedPreferences!
+                      .setString('user', userController.text.toString());
+                  sharedPreferences!
+                      .setString('pass', passwordController.text.toString());
+                  print('User: ${sharedPreferences!.getString('user')}');
+                  print('Password: ${sharedPreferences!.getString('pass')}');
+                  if (_formKey.currentState!.validate()) {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => HomePage()));
+                    print('successful');
+                  }
+                },
                 child: Text("Login"),
                 color: Colors.blue,
               ),
               MaterialButton(
-                onPressed: ()async{
+                onPressed: () async {
                   print('User: ${sharedPreferences!.getString('user')}');
                   print('Password: ${sharedPreferences!.getString('pass')}');
                 },
@@ -89,12 +94,12 @@ class _LoginPageState extends State<LoginPage> {
                 color: Colors.green,
               ),
               MaterialButton(
-                  onPressed: (){
-                    Navigator.push(context, MaterialPageRoute(builder: (context)=>HomePage()));
-                  },
+                onPressed: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => HomePage()));
+                },
                 child: Text('home'),
               ),
-
             ],
           ),
         ),
