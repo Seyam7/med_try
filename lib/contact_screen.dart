@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:medai_try/database/detabase_helper.dart';
 
 class ContactPage extends StatefulWidget {
   const ContactPage({super.key});
@@ -9,85 +9,100 @@ class ContactPage extends StatefulWidget {
 }
 
 class _ContactPageState extends State<ContactPage> {
-  TextEditingController nameController= TextEditingController();
-  TextEditingController phnController= TextEditingController();
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
+  final DatabaseHelper _databaseHelper = DatabaseHelper();
+  List<Map<String, dynamic>> _contacts = [];
 
-  //List _contact=['ban','nepal','india'];
-  Box? _contactBox;
   @override
   void initState() {
-    _contactBox = Hive.box('contactBox');
     super.initState();
+    _refreshContacts();
   }
 
-  Future openDialog() => showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text("Add Contact",style: TextStyle(color: Colors.blue),),
-          content: Column(
-            children: [
-              TextFormField(
-                controller: nameController,
-                autofocus: true,
-                keyboardType: TextInputType.name,
-                decoration: InputDecoration(
-                  hintText: 'Enter name',
-                ),
-              ),
-              TextFormField(
-                controller: phnController,
-                autofocus: true,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  hintText: 'Enter contact number',
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(onPressed: (){
-              final contactName= nameController.text;
-              _contactBox!.add(contactName);
-              final contactPhn= phnController.text;
-              //_contactBox!.add(contactName);
-            },
-              child: Text('SUBMIT',style: TextStyle(color: Colors.blue),),
+  Future<void> _refreshContacts() async {
+    final contacts = await _databaseHelper.getContacts();
+    setState(() {
+      _contacts = contacts;
+    });
+  }
+
+  Future<void> _addContact() async {
+    if (nameController.text.isNotEmpty && phoneController.text.isNotEmpty) {
+      await _databaseHelper.insertContact({
+        'name': nameController.text.trim(),
+        'phone': phoneController.text.trim(),
+      });
+      _refreshContacts();
+      nameController.clear();
+      phoneController.clear();
+      Navigator.pop(context);
+    }
+  }
+
+  Future<void> openDialog() => showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text(
+        "Add Contact",
+        style: TextStyle(color: Colors.blue),
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextFormField(
+            controller: nameController,
+            autofocus: true,
+            decoration: const InputDecoration(
+              hintText: 'Enter name',
             ),
-          ],
+          ),
+          TextFormField(
+            controller: phoneController,
+            keyboardType: TextInputType.phone,
+            decoration: const InputDecoration(
+              hintText: 'Enter contact number',
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: _addContact,
+          child: const Text(
+            'SUBMIT',
+            style: TextStyle(color: Colors.blue),
+          ),
         ),
-      );
+      ],
+    ),
+  );
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Contacts'),
+        title: const Text('Contacts'),
         backgroundColor: Colors.blue,
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: ValueListenableBuilder(
-            valueListenable: Hive.box('contactBox').listenable(),
-            builder: (context,box,widget)=> ListView.builder(
-                itemCount: _contactBox!.keys.toList().length,
-                itemBuilder: (context,index){
-                  return Card(
-                    child: ListTile(
-                      title: Text(_contactBox!.getAt(index).toString()),
-                      //trailing: Text(_contactBox!.getAt(index).toString()),
-                      //trailing: IconButton(onPressed: (){box.clear();}, icon: Icon(Icons.delete)),
-                    ),
-                  );
-                },
-              )
+        child: ListView.builder(
+          itemCount: _contacts.length,
+          itemBuilder: (context, index) {
+            return Card(
+              child: ListTile(
+                title: Text(_contacts[index]['name']),
+                subtitle: Text(_contacts[index]['phone']),
+              ),
+            );
+          },
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          print('floating button pressed');
-          openDialog();
-        },
-        child: Icon(Icons.add),
+        onPressed: openDialog,
         backgroundColor: Colors.blue,
+        child: const Icon(Icons.add),
       ),
     );
   }

@@ -19,7 +19,7 @@ class _HomePageState extends State<HomePage> {
   getDoctorsData() async {
     var docList = await http.get(Uri.parse(
         'https://demo-app.medaicloud.live/api/v1/all_user/get_doctor_list'));
-    //print('doc list :-${docList.body}');
+    print('doc list :-${docList.body}');
     setState(() {
       medaiMap = Map<String, dynamic>.from(jsonDecode(docList.body));
     });
@@ -45,7 +45,7 @@ class _HomePageState extends State<HomePage> {
           child: ListView.builder(
             shrinkWrap: true,
             scrollDirection: Axis.vertical,
-            itemCount: 50,
+            itemCount: medaiMap?["doctor_list"].length,
             itemBuilder: (context, index) {
               return Card(
                 //margin: EdgeInsets.only(bottom: 5),
